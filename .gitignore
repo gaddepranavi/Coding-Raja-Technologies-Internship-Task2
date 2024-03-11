@@ -1,160 +1,85 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+import json
+import os
+from datetime import datetime
 
-# C extensions
-*.so
+TRANSACTIONS_FILE = "transactions.json"
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+def load_transactions():
+    """Load transactions from the file."""
+    if os.path.exists(TRANSACTIONS_FILE):
+        with open(TRANSACTIONS_FILE, "r") as file:
+            return json.load(file)
+    return {"income": [], "expenses": []}
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+def save_transactions(transactions):
+    """Save transactions to the file."""
+    with open(TRANSACTIONS_FILE, "w") as file:
+        json.dump(transactions, file, indent=4)
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+def add_income(transactions, amount, category):
+    """Add income transaction."""
+    transactions["income"].append({"amount": amount, "category": category, "timestamp": str(datetime.now())})
+    save_transactions(transactions)
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
+def add_expense(transactions, amount, category):
+    """Add expense transaction."""
+    transactions["expenses"].append({"amount": amount, "category": category, "timestamp": str(datetime.now())})
+    save_transactions(transactions)
 
-# Translations
-*.mo
-*.pot
+def calculate_budget(transactions):
+    """Calculate remaining budget."""
+    total_income = sum(transaction["amount"] for transaction in transactions["income"])
+    total_expenses = sum(transaction["amount"] for transaction in transactions["expenses"])
+    remaining_budget = total_income - total_expenses
+    return remaining_budget
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+def analyze_expenses(transactions):
+    """Analyze expenses by category."""
+    expense_categories = {}
+    for expense in transactions["expenses"]:
+        category = expense["category"]
+        amount = expense["amount"]
+        expense_categories[category] = expense_categories.get(category, 0) + amount
+    return expense_categories
 
-# Flask stuff:
-instance/
-.webassets-cache
+def main():
+    transactions = load_transactions()
 
-# Scrapy stuff:
-.scrapy
+    while True:
+        print("\n===== Budget Tracker Menu =====")
+        print("1. Add Income")
+        print("2. Add Expense")
+        print("3. View Remaining Budget")
+        print("4. Analyze Expenses")
+        print("5. Exit")
 
-# Sphinx documentation
-docs/_build/
+        choice = input("Enter your choice: ")
 
-# PyBuilder
-.pybuilder/
-target/
+        if choice == "1":
+            amount = float(input("Enter income amount: "))
+            category = input("Enter income category: ")
+            add_income(transactions, amount, category)
+            print("Income added successfully!")
+        elif choice == "2":
+            amount = float(input("Enter expense amount: "))
+            category = input("Enter expense category: ")
+            add_expense(transactions, amount, category)
+            print("Expense added successfully!")
+        elif choice == "3":
+            remaining_budget = calculate_budget(transactions)
+            print(f"Remaining Budget: ${remaining_budget:.2f}")
+        elif choice == "4":
+            expense_categories = analyze_expenses(transactions)
+            print("\nExpense Analysis:")
+            for category, amount in expense_categories.items():
+                print(f"{category}: ${amount:.2f}")
+        elif choice == "5":
+            print("Exiting...")
+            break
+        else:
+            print("Invalid choice. Please try again.")
 
-# Jupyter Notebook
-.ipynb_checkpoints
+if _name_ == "_main_":
+    main()
 
-# IPython
-profile_default/
-ipython_config.py
 
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
-
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
-#   in version control.
-#   https://pdm.fming.dev/#use-with-ide
-.pdm.toml
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
